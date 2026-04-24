@@ -1,9 +1,11 @@
 idf_component_register(
-    SRCS "test_app_main.c"
+    SRCS
+        "test_app_main.c"
+        "test_counter.c"
     INCLUDE_DIRS "."
-    # "test" here is the special component name the unity_test_runner uses to
-    # auto-discover and execute TEST_CASE() definitions registered by test
-    # sub-components.
     REQUIRES unity counter
+    # WHOLE_ARCHIVE keeps the TEST_CASE() registration constructors generated
+    # by Unity from being dropped by the linker, so unity_run_all_tests() can
+    # discover and execute every case in this component.
     WHOLE_ARCHIVE
 )

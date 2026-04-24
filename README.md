@@ -61,15 +61,13 @@ faetter_BR-project/
 │   └── counter/                        # Tiny reusable counter component
 │       ├── CMakeLists.txt
 │       ├── counter.c
-│       ├── include/counter.h
-│       └── test/                       # Unity test cases for counter
-│           ├── CMakeLists.txt
-│           └── test_counter.c
+│       └── include/counter.h
 ├── test_app/                           # Dedicated IDF project that runs Unity tests
 │   ├── CMakeLists.txt
 │   └── main/
 │       ├── CMakeLists.txt
-│       └── test_app_main.c
+│       ├── test_app_main.c             # UNITY_BEGIN / unity_run_all_tests / UNITY_END
+│       └── test_counter.c              # Unity TEST_CASE()s for the counter component
 └── .github/workflows/build.yml         # CI: firmware build + host-target tests
 ```
 

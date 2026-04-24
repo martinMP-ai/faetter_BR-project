@@ -56,3 +56,32 @@ TEST_CASE("counter APIs tolerate NULL input", "[counter]")
     TEST_ASSERT_EQUAL_UINT32(0u, counter_next(NULL));
     counter_reset(NULL);
 }
+
+TEST_CASE("multiple counters are independent of each other", "[counter]")
+{
+    /*
+     * Regression guard: confirms that counter_t instances carry their own
+     * state and that the API never relies on hidden/global storage. Mutating
+     * one counter must not affect another, even when they're interleaved.
+     */
+    counter_t a;
+    counter_t b;
+    counter_init(&a);
+    counter_init(&b);
+
+    TEST_ASSERT_EQUAL_UINT32(1u, counter_next(&a));
+    TEST_ASSERT_EQUAL_UINT32(0u, counter_value(&b));
+
+    TEST_ASSERT_EQUAL_UINT32(1u, counter_next(&b));
+    TEST_ASSERT_EQUAL_UINT32(2u, counter_next(&b));
+    TEST_ASSERT_EQUAL_UINT32(3u, counter_next(&b));
+
+    /* a is still at 1 even though b advanced three times. */
+    TEST_ASSERT_EQUAL_UINT32(1u, counter_value(&a));
+    TEST_ASSERT_EQUAL_UINT32(3u, counter_value(&b));
+
+    /* Resetting one must not reset the other. */
+    counter_reset(&a);
+    TEST_ASSERT_EQUAL_UINT32(0u, counter_value(&a));
+    TEST_ASSERT_EQUAL_UINT32(3u, counter_value(&b));
+}
