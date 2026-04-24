@@ -52,13 +52,55 @@ I (xxx) faetter_BR: Heartbeat #2
 
 ```
 faetter_BR-project/
-├── CMakeLists.txt              # Top-level IDF project file
-├── sdkconfig                   # Current build configuration (target = esp32h2)
+├── CMakeLists.txt                      # Top-level IDF project file
+├── sdkconfig                           # Build configuration (target = esp32h2)
 ├── main/
-│   ├── CMakeLists.txt          # Component registration
-│   └── faetter_BR-project.c    # app_main() with the heartbeat loop
-└── .gitignore
+│   ├── CMakeLists.txt
+│   └── faetter_BR-project.c            # app_main() heartbeat loop
+├── components/
+│   └── counter/                        # Tiny reusable counter component
+│       ├── CMakeLists.txt
+│       ├── counter.c
+│       ├── include/counter.h
+│       └── test/                       # Unity test cases for counter
+│           ├── CMakeLists.txt
+│           └── test_counter.c
+├── test_app/                           # Dedicated IDF project that runs Unity tests
+│   ├── CMakeLists.txt
+│   └── main/
+│       ├── CMakeLists.txt
+│       └── test_app_main.c
+└── .github/workflows/build.yml         # CI: firmware build + host-target tests
 ```
+
+## Running tests
+
+Unit tests live next to each component under `components/<name>/test/` and are
+driven by the Unity framework. A dedicated project in `test_app/` discovers
+and runs every registered `TEST_CASE()`. Tests can run either on a real chip
+or on the `linux` host target (the approach used in CI, no hardware needed).
+
+### On the Linux host (no hardware)
+
+```bash
+cd test_app
+idf.py --preview set-target linux
+idf.py build
+./build/faetter_BR-project-tests.elf
+```
+
+Exit code is `0` on success, non-zero if any test case fails.
+
+### On an ESP32-H2 board
+
+```bash
+cd test_app
+idf.py set-target esp32h2
+idf.py flash monitor
+```
+
+The runner prints the Unity summary (`N Tests 0 Failures 0 Ignored`) at the
+end and then idles; exit the monitor with `Ctrl+]`.
 
 ## Troubleshooting
 
