@@ -1,5 +1,7 @@
 # faetter_BR-project
 
+[![Build](https://github.com/martinMP-ai/faetter_BR-project/actions/workflows/build.yml/badge.svg)](https://github.com/martinMP-ai/faetter_BR-project/actions/workflows/build.yml)
+
 A minimal ESP-IDF firmware for the **ESP32-H2** that prints a 1 Hz heartbeat log
 over the USB-Serial-JTAG console. It's intended as a known-good starter that
 verifies your ESP-IDF toolchain, board, and flashing workflow end-to-end.

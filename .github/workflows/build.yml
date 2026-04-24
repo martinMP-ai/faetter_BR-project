@@ -1,0 +1,62 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel any in-flight runs for the same branch/PR when a new commit is pushed.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (ESP-IDF ${{ matrix.idf_version }}, target ${{ matrix.target }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Build against the latest stable ESP-IDF release that ships
+        # first-class ESP32-H2 support. Add more versions here if you want
+        # multi-version coverage (e.g. "v5.3", "latest").
+        idf_version: ["v5.4"]
+        target: ["esp32h2"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build firmware
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf_version }}
+          target: ${{ matrix.target }}
+          path: "."
+
+      - name: Show build size report
+        run: |
+          ls -la build/
+          echo "---"
+          if [ -f build/faetter_BR-project.bin ]; then
+            stat -c '%n %s bytes' build/faetter_BR-project.bin || \
+              stat -f '%N %z bytes' build/faetter_BR-project.bin
+          fi
+
+      - name: Upload firmware artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.target }}-${{ matrix.idf_version }}
+          path: |
+            build/faetter_BR-project.bin
+            build/faetter_BR-project.elf
+            build/faetter_BR-project.map
+            build/bootloader/bootloader.bin
+            build/partition_table/partition-table.bin
+          if-no-files-found: error
+          retention-days: 14
