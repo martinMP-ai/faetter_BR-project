@@ -1,0 +1,14 @@
+# ESP-IDF build artifacts
+build/
+sdkconfig.old
+sdkconfig.defaults.old
+
+# Managed components (regenerated from idf_component.yml)
+managed_components/
+dependencies.lock
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
